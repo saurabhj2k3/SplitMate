@@ -193,8 +193,11 @@ export class BalanceService {
       userNetBalance: number;
     }> = [];
 
-    for (const ug of userGroups) {
-      const groupBalance = await this.getGroupBalances(ug.groupId);
+    const groupBalances = await Promise.all(
+      userGroups.map((ug) => this.getGroupBalances(ug.groupId))
+    );
+
+    for (const groupBalance of groupBalances) {
       const myBalance = groupBalance.memberBalances.find((m) => m.userId === userId);
       const userNet = myBalance ? myBalance.netBalance : 0;
 

@@ -79,6 +79,8 @@ model GroupMember {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([groupId, userId])
+  @@index([userId])
+  @@index([groupId])
   @@map("group_members")
 }
 
@@ -103,6 +105,8 @@ model Expense {
   createdBy   User         @relation("ExpenseCreator", fields: [createdById], references: [id], onDelete: Cascade)
   splits      ExpenseSplit[]
 
+  @@index([groupId, isDeleted])
+  @@index([payerId])
   @@map("expenses")
 }
 
@@ -119,6 +123,8 @@ model ExpenseSplit {
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([expenseId, userId])
+  @@index([userId])
+  @@index([expenseId])
   @@map("expense_splits")
 }
 
@@ -138,6 +144,9 @@ model Settlement {
   payer       User             @relation("SettlementPayer", fields: [payerId], references: [id], onDelete: Cascade)
   receiver    User             @relation("SettlementReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
 
+  @@index([groupId, status])
+  @@index([payerId])
+  @@index([receiverId])
   @@map("settlements")
 }
 
@@ -152,5 +161,6 @@ model Activity {
   group       Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([groupId, createdAt])
   @@map("activities")
 }
