@@ -13,8 +13,10 @@ class GroupExpensesNotifier extends StateNotifier<AsyncValue<List<ExpenseModel>>
     fetchExpenses();
   }
 
-  Future<void> fetchExpenses() async {
-    state = const AsyncValue.loading();
+  Future<void> fetchExpenses({bool forceRefresh = false}) async {
+    if (state.value == null || forceRefresh) {
+      state = const AsyncValue.loading();
+    }
     try {
       final response = await apiClient.client.get('/groups/$groupId/expenses');
       final rawList = response.data['data'] as List<dynamic>;
@@ -23,7 +25,9 @@ class GroupExpensesNotifier extends StateNotifier<AsyncValue<List<ExpenseModel>>
           .toList();
       state = AsyncValue.data(expenses);
     } catch (e, stack) {
-      state = AsyncValue.error(e, stack);
+      if (state.value == null) {
+        state = AsyncValue.error(e, stack);
+      }
     }
   }
 
