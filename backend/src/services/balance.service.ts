@@ -39,11 +39,20 @@ export class BalanceService {
         expenses: {
           where: { isDeleted: false },
           include: {
-            splits: true,
+            payer: { select: { id: true, name: true, email: true, avatarUrl: true } },
+            splits: {
+              include: {
+                user: { select: { id: true, name: true, email: true, avatarUrl: true } },
+              },
+            },
           },
         },
         settlements: {
           where: { status: 'COMPLETED' },
+          include: {
+            payer: { select: { id: true, name: true, email: true, avatarUrl: true } },
+            receiver: { select: { id: true, name: true, email: true, avatarUrl: true } },
+          },
         },
       },
     });
@@ -55,31 +64,45 @@ export class BalanceService {
     const membersMap = new Map<string, { name: string; email: string; avatarUrl?: string | null }>();
     const balances: Record<string, UserBalance> = {};
 
+    const ensureUserInBalances = (user: { id: string; name: string; email: string; avatarUrl?: string | null }) => {
+      if (!membersMap.has(user.id)) {
+        membersMap.set(user.id, {
+          name: user.name,
+          email: user.email,
+          avatarUrl: user.avatarUrl,
+        });
+      }
+      if (!balances[user.id]) {
+        balances[user.id] = {
+          userId: user.id,
+          name: user.name,
+          email: user.email,
+          avatarUrl: user.avatarUrl,
+          amountPaid: 0,
+          amountOwed: 0,
+          settlementPaid: 0,
+          settlementReceived: 0,
+          netBalance: 0,
+        };
+      }
+    };
+
     for (const m of group.members) {
-      membersMap.set(m.user.id, {
-        name: m.user.name,
-        email: m.user.email,
-        avatarUrl: m.user.avatarUrl,
-      });
-      balances[m.user.id] = {
-        userId: m.user.id,
-        name: m.user.name,
-        email: m.user.email,
-        avatarUrl: m.user.avatarUrl,
-        amountPaid: 0,
-        amountOwed: 0,
-        settlementPaid: 0,
-        settlementReceived: 0,
-        netBalance: 0,
-      };
+      ensureUserInBalances(m.user);
     }
 
-    // 1. Process Expenses
+    // 1. Process Expenses & register any non-member payers/participants
     for (const expense of group.expenses) {
+      if (expense.payer) {
+        ensureUserInBalances(expense.payer);
+      }
       if (balances[expense.payerId]) {
         balances[expense.payerId].amountPaid += expense.amount;
       }
       for (const split of expense.splits) {
+        if (split.user) {
+          ensureUserInBalances(split.user);
+        }
         if (balances[split.userId]) {
           balances[split.userId].amountOwed += split.amount;
         }
@@ -88,6 +111,12 @@ export class BalanceService {
 
     // 2. Process Completed Settlements
     for (const settlement of group.settlements) {
+      if (settlement.payer) {
+        ensureUserInBalances(settlement.payer);
+      }
+      if (settlement.receiver) {
+        ensureUserInBalances(settlement.receiver);
+      }
       if (balances[settlement.payerId]) {
         balances[settlement.payerId].settlementPaid += settlement.amount;
       }

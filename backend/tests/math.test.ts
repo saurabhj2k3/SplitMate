@@ -198,6 +198,43 @@ describe('SplitMate Financial Math & Debt Engine', () => {
       expect(settlements.find((s) => s.from === 'Rahul')?.amount).toBe(250);
     });
 
+    it('simplifies Ganpati Darshan 6-member scenario with exact precision', () => {
+      // Dinner: ₹700 by Sakshi (Sakshi, Om, sneha, saurabh, vedika) -> 140 each
+      // tea: ₹60 by vaibhav (Sakshi, Om, sneha, saurabh, vedika, vaibhav) -> 10 each
+      // Soda: ₹60 by Om (Sakshi, Om, sneha, saurabh, vedika) -> 12 each
+      // Net:
+      // Sakshi: 700 - 162 = +538
+      // vaibhav: 60 - 10 = +50
+      // sneha: 0 - 162 = -162
+      // saurabh: 0 - 162 = -162
+      // vedika: 0 - 162 = -162
+      // Om: 60 - 162 = -102
+      const netBalances = {
+        Sakshi: 538,
+        vaibhav: 50,
+        sneha: -162,
+        saurabh: -162,
+        vedika: -162,
+        Om: -102,
+      };
+
+      const settlements = simplifyDebts(netBalances);
+
+      const totalTransferred = settlements.reduce((sum, s) => sum + s.amount, 0);
+      expect(totalTransferred).toBe(588);
+
+      // sneha, saurabh, vedika pay Sakshi 162 each (total 486)
+      expect(settlements.find((s) => s.from === 'sneha' && s.to === 'Sakshi')?.amount).toBe(162);
+      expect(settlements.find((s) => s.from === 'saurabh' && s.to === 'Sakshi')?.amount).toBe(162);
+      expect(settlements.find((s) => s.from === 'vedika' && s.to === 'Sakshi')?.amount).toBe(162);
+
+      // Om pays remaining Sakshi balance (538 - 486 = 52)
+      expect(settlements.find((s) => s.from === 'Om' && s.to === 'Sakshi')?.amount).toBe(52);
+
+      // Om pays vaibhav (50)
+      expect(settlements.find((s) => s.from === 'Om' && s.to === 'vaibhav')?.amount).toBe(50);
+    });
+
     it('returns empty array if all balances are zero', () => {
       const netBalances = {
         User1: 0,
