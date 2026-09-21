@@ -1,0 +1,6 @@
+﻿name = "splitmate"
+compatibility_date = "2026-09-01"
+
+[assets]
+directory = "mobile/build/web"
+binding = "ASSETS"
