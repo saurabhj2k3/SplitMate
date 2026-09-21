@@ -1,0 +1,26 @@
+name: splitmate
+description: "SplitMate - Group Expense & Settlement Management Platform"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^2.6.1
+  dio: ^5.8.0+1
+  intl: ^0.20.2
+  google_fonts: ^6.2.1
+  shared_preferences: ^2.5.2
+  flutter_lucide: ^1.4.0
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
