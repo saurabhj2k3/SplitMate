@@ -29,7 +29,7 @@ export class GroupController {
 
   static async getGroupById(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const group = await GroupService.getGroupById(req.params.id, req.user?.id);
+      const group = await GroupService.getGroupById(req.params.id as string, req.user?.id);
       sendSuccess(res, group);
     } catch (error) {
       next(error);
@@ -39,7 +39,7 @@ export class GroupController {
   static async updateGroup(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { name, description, imageUrl } = req.body;
-      const group = await GroupService.updateGroup(req.params.id, {
+      const group = await GroupService.updateGroup(req.params.id as string, {
         name,
         description,
         imageUrl,
@@ -52,7 +52,7 @@ export class GroupController {
 
   static async deleteGroup(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      await GroupService.deleteGroup(req.params.id);
+      await GroupService.deleteGroup(req.params.id as string);
       sendSuccess(res, null, 'Group deleted successfully.');
     } catch (error) {
       next(error);
@@ -62,7 +62,7 @@ export class GroupController {
   static async addMember(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { identifier } = req.body; // email, userId, or phone
-      const member = await GroupService.addMember(req.params.id, req.user!.id, identifier);
+      const member = await GroupService.addMember(req.params.id as string, req.user!.id, identifier);
       sendSuccess(res, member, 'Member added successfully.', 201);
     } catch (error) {
       next(error);
@@ -81,7 +81,7 @@ export class GroupController {
 
   static async removeMember(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      await GroupService.removeMember(req.params.id, req.params.userId, req.user!.id);
+      await GroupService.removeMember(req.params.id as string, req.params.userId as string, req.user!.id);
       sendSuccess(res, null, 'Member removed successfully.');
     } catch (error) {
       next(error);

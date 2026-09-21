@@ -232,7 +232,13 @@ export class ExpenseService {
     const updatedAmount = data.amount ?? existing.amount;
     const updatedMethod = (data.splitMethod ?? existing.splitMethod) as SplitMethodType;
     const updatedPayer = data.payerId ?? existing.payerId;
-    const updatedSplitsInput = data.splits ?? existing.splits;
+    const updatedSplitsInput = data.splits ??
+      existing.splits.map((s) => ({
+        userId: s.userId,
+        amount: s.amount,
+        percentage: s.percentage ?? undefined,
+        shares: s.shares ?? undefined,
+      }));
 
     const participantIds = [updatedPayer, ...updatedSplitsInput.map((s) => s.userId)];
     await this.validateGroupMembership(existing.groupId, Array.from(new Set(participantIds)));

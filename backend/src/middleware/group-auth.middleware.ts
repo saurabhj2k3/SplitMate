@@ -18,7 +18,7 @@ export async function requireGroupMembership(
   next: NextFunction
 ): Promise<void> {
   const userId = req.user?.id;
-  const groupId = req.params.groupId || req.params.id || req.body.groupId;
+  const groupId = (req.params.groupId || req.params.id || req.body.groupId) as string | undefined;
 
   if (!userId) {
     sendError(res, 'Authentication required.', 401);
@@ -58,7 +58,7 @@ export async function requireGroupOwner(
   next: NextFunction
 ): Promise<void> {
   const userId = req.user?.id;
-  const groupId = req.params.groupId || req.params.id || req.body.groupId;
+  const groupId = (req.params.groupId || req.params.id || req.body.groupId) as string | undefined;
 
   if (!userId) {
     sendError(res, 'Authentication required.', 401);

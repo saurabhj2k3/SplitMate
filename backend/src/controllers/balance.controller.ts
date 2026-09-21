@@ -6,7 +6,7 @@ import { sendSuccess } from '../utils/api-response';
 export class BalanceController {
   static async getGroupBalances(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const balances = await BalanceService.getGroupBalances(req.params.groupId);
+      const balances = await BalanceService.getGroupBalances(req.params.groupId as string);
       sendSuccess(res, balances);
     } catch (error) {
       next(error);

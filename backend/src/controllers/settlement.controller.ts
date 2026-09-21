@@ -26,7 +26,7 @@ export class SettlementController {
 
   static async getGroupSettlements(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const settlements = await SettlementService.getGroupSettlements(req.params.groupId);
+      const settlements = await SettlementService.getGroupSettlements(req.params.groupId as string);
       sendSuccess(res, settlements);
     } catch (error) {
       next(error);
@@ -37,7 +37,7 @@ export class SettlementController {
     try {
       const { status } = req.body;
       const settlement = await SettlementService.updateSettlementStatus(
-        req.params.id,
+        req.params.id as string,
         req.user!.id,
         status
       );

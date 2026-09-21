@@ -6,7 +6,7 @@ import { sendSuccess } from '../utils/api-response';
 export class ActivityController {
   static async getGroupActivity(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const activities = await ActivityService.getGroupActivity(req.params.groupId);
+      const activities = await ActivityService.getGroupActivity(req.params.groupId as string);
       sendSuccess(res, activities);
     } catch (error) {
       next(error);

@@ -39,7 +39,7 @@ export class ExpenseController {
 
   static async getGroupExpenses(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const expenses = await ExpenseService.getGroupExpenses(req.params.groupId);
+      const expenses = await ExpenseService.getGroupExpenses(req.params.groupId as string);
       sendSuccess(res, expenses);
     } catch (error) {
       next(error);
@@ -48,7 +48,7 @@ export class ExpenseController {
 
   static async getExpenseById(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const expense = await ExpenseService.getExpenseById(req.params.id);
+      const expense = await ExpenseService.getExpenseById(req.params.id as string);
       sendSuccess(res, expense);
     } catch (error) {
       next(error);
@@ -69,7 +69,7 @@ export class ExpenseController {
         splits,
       } = req.body;
 
-      const expense = await ExpenseService.updateExpense(req.params.id, req.user!.id, {
+      const expense = await ExpenseService.updateExpense(req.params.id as string, req.user!.id, {
         payerId,
         description,
         amount: amount !== undefined ? Number(amount) : undefined,
@@ -89,7 +89,7 @@ export class ExpenseController {
 
   static async deleteExpense(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      await ExpenseService.deleteExpense(req.params.id, req.user!.id);
+      await ExpenseService.deleteExpense(req.params.id as string, req.user!.id);
       sendSuccess(res, null, 'Expense deleted successfully.');
     } catch (error) {
       next(error);
