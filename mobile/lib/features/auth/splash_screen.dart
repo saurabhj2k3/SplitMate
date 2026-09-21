@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
@@ -5,6 +6,7 @@ import '../../core/constants/colors.dart';
 import '../../providers/auth_provider.dart';
 import '../auth/login_screen.dart';
 import '../dashboard/dashboard_screen.dart';
+import '../groups/group_detail_screen.dart';
 
 class SplashScreen extends ConsumerWidget {
   const SplashScreen({super.key});
@@ -15,10 +17,27 @@ class SplashScreen extends ConsumerWidget {
 
     if (!authState.isLoading) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        String? targetGroupId;
+        if (kIsWeb) {
+          final uri = Uri.base;
+          targetGroupId = uri.queryParameters['id'];
+        }
+
         if (authState.isAuthenticated) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => const DashboardScreen()),
-          );
+          if (targetGroupId != null && targetGroupId.isNotEmpty) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (_) => const DashboardScreen()),
+            );
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => GroupDetailScreen(groupId: targetGroupId!),
+              ),
+            );
+          } else {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (_) => const DashboardScreen()),
+            );
+          }
         } else {
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (_) => const LoginScreen()),

@@ -45,9 +45,11 @@ class _GroupDetailScreenState extends ConsumerState<GroupDetailScreen> {
   String _getShareUrl(String code) {
     if (kIsWeb) {
       final origin = Uri.base.origin;
-      return '$origin/join/$code';
+      if (origin.contains('localhost') || origin.contains('127.0.0.1')) {
+        return '$origin/group?id=$code';
+      }
     }
-    return 'https://splitmate.pages.dev/join/$code';
+    return 'https://expenses.freedev.app/group?id=$code';
   }
 
   void _copyShareUrl(String code) {
