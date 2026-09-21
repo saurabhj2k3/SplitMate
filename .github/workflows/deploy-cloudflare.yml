@@ -1,0 +1,44 @@
+﻿name: Deploy Flutter Web to Cloudflare Pages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'mobile/**'
+      - '.github/workflows/deploy-cloudflare.yml'
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    name: Build & Deploy to Cloudflare Pages
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install Dependencies
+        working-directory: mobile
+        run: flutter pub get
+
+      - name: Build Flutter Web Release
+        working-directory: mobile
+        env:
+          BACKEND_API_URL: ${{ secrets.BACKEND_API_URL }}
+        run: |
+          API_URL="${BACKEND_API_URL:-https://splitmate.vercel.app/api/v1}"
+          flutter build web --release --dart-define=API_URL=$API_URL
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy mobile/build/web --project-name=splitmate
