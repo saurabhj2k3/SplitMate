@@ -23,6 +23,25 @@ export function createApp(): Express {
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+  // Root Welcome Endpoint
+  app.get('/', (req: Request, res: Response) => {
+    res.status(200).json({
+      status: 'online',
+      message: '🚀 SplitMate Backend API is running successfully.',
+      version: '1.0.0',
+      healthCheck: '/api/health',
+      baseApiUrl: '/api/v1',
+      endpoints: {
+        auth: '/api/v1/auth',
+        groups: '/api/v1/groups',
+        expenses: '/api/v1/expenses',
+        settlements: '/api/v1/settlements',
+        balances: '/api/v1/balances',
+        activities: '/api/v1/activities',
+      },
+    });
+  });
+
   // Health check
   app.get('/api/health', (req: Request, res: Response) => {
     res.status(200).json({
