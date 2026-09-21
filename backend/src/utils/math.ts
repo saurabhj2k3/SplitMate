@@ -222,6 +222,97 @@ export function validateAndCalculateSharesSplit(
   }));
 }
 
+export interface DirectExpenseInput {
+  payerId: string;
+  splits: Array<{ userId: string; amount: number }>;
+}
+
+export interface DirectSettlementInput {
+  payerId: string;
+  receiverId: string;
+  amount: number;
+}
+
+/**
+ * Direct Pairwise Debt Algorithm (Option B).
+ * Tracks exact who-owes-whom per expense and settlement,
+ * nets bilaterally between each pair of individuals without cross-person debt transfers.
+ */
+export function calculateDirectDebts(
+  expenses: DirectExpenseInput[],
+  settlements: DirectSettlementInput[] = []
+): DebtItem[] {
+  // Map of debtorId -> (creditorId -> cents)
+  const debtMatrix = new Map<string, Map<string, number>>();
+
+  const addDebt = (from: string, to: string, cents: number) => {
+    if (from === to || cents === 0) return;
+    if (!debtMatrix.has(from)) {
+      debtMatrix.set(from, new Map<string, number>());
+    }
+    const current = debtMatrix.get(from)!.get(to) || 0;
+    debtMatrix.get(from)!.set(to, current + cents);
+  };
+
+  // 1. Process Expenses
+  for (const exp of expenses) {
+    for (const split of exp.splits) {
+      if (split.userId !== exp.payerId && split.amount > 0) {
+        addDebt(split.userId, exp.payerId, toCents(split.amount));
+      }
+    }
+  }
+
+  // 2. Process Settlements (reduces debt from payer to receiver)
+  for (const set of settlements) {
+    if (set.amount > 0) {
+      addDebt(set.payerId, set.receiverId, -toCents(set.amount));
+    }
+  }
+
+  // 3. Bilateral Netting between each pair (A, B)
+  const allUsers = new Set<string>();
+  for (const [from, map] of debtMatrix.entries()) {
+    allUsers.add(from);
+    for (const to of map.keys()) {
+      allUsers.add(to);
+    }
+  }
+
+  const userList = Array.from(allUsers);
+  const result: DebtItem[] = [];
+
+  for (let i = 0; i < userList.length; i++) {
+    for (let j = i + 1; j < userList.length; j++) {
+      const u1 = userList[i];
+      const u2 = userList[j];
+
+      const u1OwesU2 = debtMatrix.get(u1)?.get(u2) || 0;
+      const u2OwesU1 = debtMatrix.get(u2)?.get(u1) || 0;
+
+      const netCents = u1OwesU2 - u2OwesU1;
+
+      if (netCents > 0) {
+        result.push({
+          from: u1,
+          to: u2,
+          amount: fromCents(netCents),
+        });
+      } else if (netCents < 0) {
+        result.push({
+          from: u2,
+          to: u1,
+          amount: fromCents(-netCents),
+        });
+      }
+    }
+  }
+
+  // Sort descending by amount
+  result.sort((a, b) => b.amount - a.amount);
+  return result;
+}
+
 /**
  * Debt Simplification Algorithm.
  * Given a map of user net balances (positive = should receive money, negative = owes money),

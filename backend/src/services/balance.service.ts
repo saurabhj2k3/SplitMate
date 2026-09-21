@@ -1,5 +1,5 @@
 import { prisma } from '../config/db';
-import { simplifyDebts, roundTo2Decimals } from '../utils/math';
+import { calculateDirectDebts, simplifyDebts, roundTo2Decimals } from '../utils/math';
 
 export interface UserBalance {
   userId: string;
@@ -146,10 +146,21 @@ export class BalanceService {
       memberBalancesList.push(b);
     }
 
-    // 4. Compute Simplified Debts ("Who Owes Whom")
-    const simplified = simplifyDebts(netBalancesRecord);
+    // 4. Compute Direct Debts (Option B: Itemized Payer-to-Participant bilateral debts)
+    const directExpenses = group.expenses.map((e) => ({
+      payerId: e.payerId,
+      splits: e.splits.map((s) => ({ userId: s.userId, amount: s.amount })),
+    }));
 
-    const simplifiedDebts: GroupSettlementDebt[] = simplified.map((debt) => {
+    const directSettlements = group.settlements.map((s) => ({
+      payerId: s.payerId,
+      receiverId: s.receiverId,
+      amount: s.amount,
+    }));
+
+    const debtsList = calculateDirectDebts(directExpenses, directSettlements);
+
+    const simplifiedDebts: GroupSettlementDebt[] = debtsList.map((debt) => {
       const fromUser = membersMap.get(debt.from);
       const toUser = membersMap.get(debt.to);
       return {

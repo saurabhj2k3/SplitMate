@@ -3,6 +3,7 @@ import {
   validateAndCalculateExactSplit,
   validateAndCalculatePercentageSplit,
   validateAndCalculateSharesSplit,
+  calculateDirectDebts,
   simplifyDebts,
   toCents,
   fromCents,
@@ -241,6 +242,77 @@ describe('SplitMate Financial Math & Debt Engine', () => {
         User2: 0,
       };
       expect(simplifyDebts(netBalances)).toEqual([]);
+    });
+  });
+
+  describe('Direct Pairwise Debt Engine (Option B: Itemized Payer-to-Participant)', () => {
+    it('calculates direct itemized debts between participants accurately', () => {
+      // Expense 1: ₹1,000 paid by vaibhav, split 4 ways (₹250 each)
+      // Expense 2: ₹600 paid by saurabh, split 4 ways (₹150 each)
+      const expenses = [
+        {
+          payerId: 'vaibhav',
+          splits: [
+            { userId: 'vaibhav', amount: 250 },
+            { userId: 'saurabh', amount: 250 },
+            { userId: 'vipin', amount: 250 },
+            { userId: 'ajay', amount: 250 },
+          ],
+        },
+        {
+          payerId: 'saurabh',
+          splits: [
+            { userId: 'vaibhav', amount: 150 },
+            { userId: 'saurabh', amount: 150 },
+            { userId: 'vipin', amount: 150 },
+            { userId: 'ajay', amount: 150 },
+          ],
+        },
+      ];
+
+      const debts = calculateDirectDebts(expenses);
+
+      // vipin owes vaibhav 250, owes saurabh 150
+      expect(debts.find((d) => d.from === 'vipin' && d.to === 'vaibhav')?.amount).toBe(250);
+      expect(debts.find((d) => d.from === 'vipin' && d.to === 'saurabh')?.amount).toBe(150);
+
+      // ajay owes vaibhav 250, owes saurabh 150
+      expect(debts.find((d) => d.from === 'ajay' && d.to === 'vaibhav')?.amount).toBe(250);
+      expect(debts.find((d) => d.from === 'ajay' && d.to === 'saurabh')?.amount).toBe(150);
+
+      // saurabh owes vaibhav 250, but vaibhav owes saurabh 150 -> net saurabh owes vaibhav 100
+      expect(debts.find((d) => d.from === 'saurabh' && d.to === 'vaibhav')?.amount).toBe(100);
+
+      // Total money to be settled
+      const total = debts.reduce((sum, d) => sum + d.amount, 0);
+      expect(total).toBe(900);
+    });
+
+    it('settlements reduce direct pairwise debts correctly', () => {
+      const expenses = [
+        {
+          payerId: 'vaibhav',
+          splits: [
+            { userId: 'vaibhav', amount: 250 },
+            { userId: 'vipin', amount: 250 },
+          ],
+        },
+      ];
+      const settlements = [
+        {
+          payerId: 'vipin',
+          receiverId: 'vaibhav',
+          amount: 100,
+        },
+      ];
+
+      const debts = calculateDirectDebts(expenses, settlements);
+      expect(debts).toHaveLength(1);
+      expect(debts[0]).toEqual({
+        from: 'vipin',
+        to: 'vaibhav',
+        amount: 150,
+      });
     });
   });
 });
