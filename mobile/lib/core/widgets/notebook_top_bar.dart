@@ -90,52 +90,37 @@ class NotebookTopBar extends ConsumerWidget implements PreferredSizeWidget {
               borderRadius: BorderRadius.circular(10),
               child: Row(
                 children: [
-                  Container(
-                    width: isMobile ? 32 : 38,
-                    height: isMobile ? 32 : 38,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFEF08A),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: AppColors.border, width: 2),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: AppColors.shadowColor,
-                          offset: Offset(2, 2),
-                          blurRadius: 0,
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.asset(
+                      'assets/images/logo.png',
+                      width: isMobile ? 32 : 38,
+                      height: isMobile ? 32 : 38,
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, __, ___) => Container(
+                        width: isMobile ? 32 : 38,
+                        height: isMobile ? 32 : 38,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFEF08A),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: AppColors.border, width: 2),
                         ),
-                      ],
-                    ),
-                    child: Icon(
-                      LucideIcons.split,
-                      color: AppColors.border,
-                      size: isMobile ? 16 : 20,
+                        child: Icon(
+                          LucideIcons.split,
+                          color: AppColors.border,
+                          size: isMobile ? 16 : 20,
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),
-                  RichText(
-                    text: TextSpan(
-                      children: [
-                        TextSpan(
-                          text: 'SplitMate',
-                          style: TextStyle(
-                            fontSize: isMobile ? 17 : 20,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.textPrimary,
-                            letterSpacing: -0.5,
-                          ),
-                        ),
-                        if (!isMobile) ...[
-                          const TextSpan(
-                            text: ' PRO',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textSecondary,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        ],
-                      ],
+                  Text(
+                    'SplitMate',
+                    style: TextStyle(
+                      fontSize: isMobile ? 18 : 22,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.textPrimary,
+                      letterSpacing: -0.5,
                     ),
                   ),
                 ],

@@ -129,17 +129,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Icon(
-                        LucideIcons.split,
-                        color: Colors.white,
-                        size: 22,
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Image.asset(
+                        'assets/images/logo.png',
+                        width: 42,
+                        height: 42,
+                        fit: BoxFit.contain,
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -147,7 +143,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       'SplitMate',
                       style: TextStyle(
                         fontSize: 24,
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w800,
                         color: AppColors.textPrimary,
                         letterSpacing: -0.4,
                       ),
