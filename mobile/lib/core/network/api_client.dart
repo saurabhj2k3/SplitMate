@@ -58,11 +58,14 @@ class ApiClient {
       return customUrl;
     }
     if (kIsWeb) {
-      // In web browser, connect to localhost:5000 during dev
-      return 'http://localhost:5000/api/v1';
+      final host = Uri.base.host;
+      if (host.contains('localhost') || host == '127.0.0.1') {
+        return 'http://localhost:5000/api/v1';
+      }
+      return 'https://split-mate-blcq.vercel.app/api/v1';
     }
-    // Android emulator uses 10.0.2.2, default fallback to localhost
-    return 'http://10.0.2.2:5000/api/v1';
+    // Android emulator / physical device fallback
+    return 'https://split-mate-blcq.vercel.app/api/v1';
   }
 
   Dio get client => _dio;

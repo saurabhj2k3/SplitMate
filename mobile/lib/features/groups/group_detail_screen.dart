@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
@@ -41,11 +42,20 @@ class _GroupDetailScreenState extends ConsumerState<GroupDetailScreen> {
     super.dispose();
   }
 
+  String _getShareUrl(String code) {
+    if (kIsWeb) {
+      final origin = Uri.base.origin;
+      return '$origin/join/$code';
+    }
+    return 'https://splitmate.pages.dev/join/$code';
+  }
+
   void _copyShareUrl(String code) {
-    Clipboard.setData(ClipboardData(text: 'http://localhost:3000/join/$code'));
+    final url = _getShareUrl(code);
+    Clipboard.setData(ClipboardData(text: url));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Share URL for group "$code" copied to clipboard!'),
+        content: Text('Share URL "$url" copied to clipboard!'),
         backgroundColor: AppColors.primary,
         duration: const Duration(seconds: 2),
       ),
@@ -461,7 +471,7 @@ class _GroupDetailScreenState extends ConsumerState<GroupDetailScreen> {
                   children: [
                     Expanded(
                       child: Text(
-                        'Share URL: http://localhost:3000/join/${group.inviteCode}',
+                        'Share URL: ${_getShareUrl(group.inviteCode)}',
                         style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
